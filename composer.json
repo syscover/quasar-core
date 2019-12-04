@@ -1,0 +1,35 @@
+{
+    "name": "quasar/core",
+    "description": "Quasar Core package",
+    "keywords": [
+        "syscover",
+        "pulsar",
+        "quasar",
+        "laravel",
+        "syscover",
+        "intranet",
+        "core",
+        "nimbl"
+    ],
+    "authors": [
+        {
+            "name": "Jose Carlos Rodríguez Palacín",
+            "email": "carlos.rodriguez@techedgegroup.com"
+        }
+    ],
+    "require": {
+        "php": "^7.2",
+        "nuwave/lighthouse": "^4.6"
+    },
+    "autoload": {
+        "psr-4": {
+            "Quasar\\Core\\": "src/Quasar/Core"
+        },
+        "classmap": [
+            "src/Quasar/Core"
+        ],
+        "files": [
+            "src/helpers.php"
+        ]
+    }
+}
