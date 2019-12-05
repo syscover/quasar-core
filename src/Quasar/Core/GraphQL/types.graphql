@@ -1,0 +1,5 @@
+type Pagination {
+    total: Int! @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PagintaionResolver@total")
+    filtered: Int @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PagintaionResolver@filtered")
+    objects(sql:[CoreSQLInput] filters:[CoreSQLInput]): [Object] @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PagintaionResolver@objects")
+}

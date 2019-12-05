@@ -1,0 +1,11 @@
+input QueryStatementInput 
+{
+    """ Command for query statement """
+    command: Command!
+    """ Column over execute query statement """
+    column: String
+    """ Operator for query statement """
+    operator: Operator
+    """ Value for statement """
+    value: Any
+}
