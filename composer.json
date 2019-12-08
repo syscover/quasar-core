@@ -19,7 +19,8 @@
     ],
     "require": {
         "php": "^7.2",
-        "nuwave/lighthouse": "^4.6"
+        "nuwave/lighthouse": "^4.6",
+        "staudenmeir/eloquent-has-many-deep": "^1.11"
     },
     "autoload": {
         "psr-4": {
