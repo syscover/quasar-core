@@ -1,4 +1,3 @@
 <?php namespace Syscover\Core\Exceptions;
 
-class ParameterValueException extends \Exception {
-}
+class ParameterValueException extends \Exception {}

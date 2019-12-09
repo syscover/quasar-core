@@ -1,4 +1,5 @@
 <?php namespace Syscover\Core\Exceptions;
 
-class ParameterNotFoundException extends \Exception {
-}
+use Exception;
+
+class ParameterNotFoundException extends Exception {}

@@ -19,7 +19,9 @@
     ],
     "require": {
         "php": "^7.2",
+        "firebase/php-jwt": "^5.0",
         "nuwave/lighthouse": "^4.6",
+        "spatie/laravel-cors": "^1.6",
         "staudenmeir/eloquent-has-many-deep": "^1.11"
     },
     "autoload": {
