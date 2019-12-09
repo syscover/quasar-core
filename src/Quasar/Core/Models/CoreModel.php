@@ -3,6 +3,8 @@
 use Illuminate\Database\Eloquent\Model as BaseModel;
 use Quasar\Core\Traits\CanManageCrud;
 use Quasar\Core\Traits\CanManageDataLang;
+use Quasar\Core\Traits\CamelCasing;
+use Quasar\Core\Traits\Uuid;
 
 /**
  * Class Model
@@ -11,5 +13,5 @@ use Quasar\Core\Traits\CanManageDataLang;
 
 class CoreModel extends BaseModel
 {
-    use CanManageCrud, CanManageDataLang;
+    use CanManageCrud, CanManageDataLang, CamelCasing, Uuid;
 }
