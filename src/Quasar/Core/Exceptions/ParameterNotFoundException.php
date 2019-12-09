@@ -1,4 +1,4 @@
-<?php namespace Syscover\Core\Exceptions;
+<?php namespace Quasar\Core\Exceptions;
 
 use Exception;
 

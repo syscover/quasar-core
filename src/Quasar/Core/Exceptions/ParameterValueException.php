@@ -1,3 +1,3 @@
-<?php namespace Syscover\Core\Exceptions;
+<?php namespace Quasar\Core\Exceptions;
 
 class ParameterValueException extends \Exception {}
