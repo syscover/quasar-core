@@ -1,13 +1,13 @@
-<?php namespace Syscover\Core\GraphQL\Resolvers;
+<?php namespace Quasar\Core\GraphQL\Resolvers;
 
 use Illuminate\Support\Facades\DB;
-use Syscover\Core\Services\SQLService;
+use Quasar\Core\Services\SQLService;
 
 class PaginationResolver
 {
     public function total($root, array $args)
     {
-        $total = SQLService::countPaginateTotalRecords($root->query);
+        $total = SQLService::countPaginateTotalRecords($root->queryBuilder);
 
         // to count elements, if sql has a groupBy statement, count function always return 1
         // check if total is equal to 1, execute FOUND_ROWS() to guarantee the real result
@@ -21,17 +21,17 @@ class PaginationResolver
         // save eager loads to load after execute FOUND_ROWS() MySql Function
         // FOUND_ROWS function get total number rows of last query, if model has eagerLoads, after execute the query model,
         // will execute eagerLoads losing the reference os last query to execute FOUND_ROWS() MySql Function
-        $eagerLoads = $root->query->getEagerLoads();
-        $query      = $root->query->setEagerLoads([]);
+        $eagerLoads     = $root->queryBuilder->getEagerLoads();
+        $queryBuilder   = $root->queryBuilder->setEagerLoads([]);
 
-        // get query filtered by sql statement and filterd by filters statement
-        $query = SQLService::getQueryFiltered($query, $args['sql'] ?? null, $args['filters'] ?? null);
+        // get query builder filtered by sql statement and filtered by filters statement
+        $queryBuilder = SQLService::getQueryFiltered($queryBuilder, $args['query'] ?? null, $args['filters'] ?? null);
 
         // get query ordered and limited
-        $query = SQLService::getQueryOrderedAndLimited($query, $args['sql'] ?? null);
+        $queryBuilder = SQLService::getQueryOrderedAndLimited($queryBuilder, $args['query'] ?? null);
 
         // get objects filtered
-        $objects = $query->get();
+        $objects = $queryBuilder->get();
 
         // execute FOUND_ROWS() MySql Function and save filtered value, to be returned in resolveFilteredField() function
         // this function is executed after resolveObjectsField according to the position of fields marked in the GraphQL query

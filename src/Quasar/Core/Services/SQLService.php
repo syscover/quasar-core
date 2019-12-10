@@ -55,13 +55,13 @@ class SQLService
     }
 
     /**
+     * @param $queryBuilder
      * @param $query
-     * @param $filter
      * @return mixed
      *
-     * Example of filter parameter
+     * Example of query parameter
      *  [
-     *      'filter' => [
+     *      'query' => [
      *          'type'  => 'and',  // operator between groups
      *          'sql'   => [
      *              [
@@ -97,71 +97,71 @@ class SQLService
      *      ]
      *  ];
      */
-    public static function setGroupQueryFilter($query, $filter)
+    public static function setGroupQueryFilter($queryBuilder, $query)
     {
-        if(isset($filter['type']))
+        if(isset($query['type']))
         {
-            $filter['type'] = strtoupper($filter['type']);
+            $query['type'] = strtoupper($query['type']);
 
-            foreach ($filter['sql'] as $sql)
+            foreach ($query['sql'] as $sql)
             {
                 if(isset($sql['column']) || isset($sql['raw']))
                 {
-                    if($filter['type'] === 'AND')
+                    if($query['type'] === 'AND')
                     {
                         if(isset($sql['raw']))
                         {
-                            $query->whereRaw($sql['raw']);
+                            $queryBuilder->whereRaw($sql['raw']);
                         }
                         elseif (isset($sql['relation']))
                         {
-                            $query->whereHas($sql['relation'], function ($query) use ($sql) {
-                                $query->where($sql['column'], $sql['operator'], $sql['value']);
+                            $queryBuilder->whereHas($sql['relation'], function ($queryBuilder) use ($sql) {
+                                $queryBuilder->where($sql['column'], $sql['operator'], $sql['value']);
                             });
                         }
                         else
                         {
-                            $query->where($sql['column'], $sql['operator'], $sql['value']);
+                            $queryBuilder->where($sql['column'], $sql['operator'], $sql['value']);
                         }
 
                     }
-                    elseif ($filter['type'] === 'OR')
+                    elseif ($query['type'] === 'OR')
                     {
                         if(isset($sql['raw']))
                         {
-                            $query->orWhereRaw($sql['raw']);
+                            $queryBuilder->orWhereRaw($sql['raw']);
                         }
                         elseif (isset($sql['relation']))
                         {
-                            $query->orWhereHas($sql['relation'], function ($query) use ($sql) {
-                                $query->where($sql['column'], $sql['operator'], $sql['value']);
+                            $queryBuilder->orWhereHas($sql['relation'], function ($queryBuilder) use ($sql) {
+                                $queryBuilder->where($sql['column'], $sql['operator'], $sql['value']);
                             });
                         }
                         else
                         {
-                            $query->orWhere($sql['column'], $sql['operator'], $sql['value']);
+                            $queryBuilder->orWhere($sql['column'], $sql['operator'], $sql['value']);
                         }
                     }
                 }
-                else // is a grouped query
+                else // is a grouped queryBuilder
                 {
-                    if($filter['type'] === 'AND')
+                    if($query['type'] === 'AND')
                     {
-                        $query->where(function ($query) use ($sql) {
-                            self::setGroupQueryFilter($query, $sql);
+                        $queryBuilder->where(function ($queryBuilder) use ($sql) {
+                            self::setGroupQueryFilter($queryBuilder, $sql);
                         });
                     }
-                    elseif ($filter['type'] === 'OR')
+                    elseif ($query['type'] === 'OR')
                     {
-                        $query->orWhere(function ($query) use ($sql) {
-                            self::setGroupQueryFilter($query, $sql);
+                        $queryBuilder->orWhere(function ($queryBuilder) use ($sql) {
+                            self::setGroupQueryFilter($queryBuilder, $sql);
                         });
                     }
                 }
             }
         }
 
-        return $query;
+        return $queryBuilder;
     }
 
     /**
@@ -216,44 +216,44 @@ class SQLService
 
     /**
      * DEPRECATED by setGroupQueryFilter
-     * @param $query
-     * @param $filters
+     * @param $queryBuilder
+     * @param $queries
      * @return mixed
      * @throws ParameterNotFoundException
      * @throws ParameterValueException
      */
-    public static function setQueryFilter($query, $filters)
+    public static function setQueryFilter($queryBuilder, $queries)
     {
         // commands without pagination and limit
-        foreach ($filters as $sql)
+        foreach ($queries as $query)
         {
-            if(! isset($sql['command']))
-                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($sql));
+            if(! isset($query['command']))
+                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
 
-            if(($sql['command'] === "where" || $sql['command'] === "orderBy") && ! isset($sql['column']))
-                throw new ParameterNotFoundException('Parameter column not found in request, please set column parameter in ' . json_encode($sql));
+            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['column']))
+                throw new ParameterNotFoundException('Parameter column not found in request, please set column parameter in ' . json_encode($query));
 
-            if(($sql['command'] === "where" || $sql['command'] === "orderBy") && ! isset($sql['operator']))
-                throw new ParameterNotFoundException('Parameter operator not found in request, please set operator parameter in ' . json_encode($sql));
+            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['operator']))
+                throw new ParameterNotFoundException('Parameter operator not found in request, please set operator parameter in ' . json_encode($query));
 
-            switch ($sql['command'])
+            switch ($query['command'])
             {
-                case 'offset':
-                case 'limit':
-                case 'orderBy':
+                case 'OFFSET':
+                case 'LIMIT':
+                case 'ORDER_BY':
                     // commands not accepted
                     break;
-                case 'where':
-                    $query->where($sql['column'], $sql['operator'], $sql['value']);
+                case 'WHERE':
+                    $queryBuilder->where($query['column'], $query['operator'], $query['value']);
                     break;
                 case 'orWhere':
-                    $query->orWhere($sql['column'], $sql['operator'], $sql['value']);
+                    $queryBuilder->orWhere($query['column'], $query['operator'], $query['value']);
                     break;
                 case 'whereIn':
-                    $query->whereIn($sql['column'], $sql['value']);
+                    $queryBuilder->whereIn($query['column'], $query['value']);
                     break;
                 case 'whereJsonContains':
-                    $query->whereJsonContains($sql['column'], $sql['value']);
+                    $queryBuilder->whereJsonContains($query['column'], $query['value']);
                     break;
 
                 default:
@@ -261,45 +261,45 @@ class SQLService
             }
         }
 
-        return $query;
+        return $queryBuilder;
     }
 
     /**
-     * @param   $query
-     * @param   array $filters
+     * @param   $queryBuilder
+     * @param   array $queries
      * @return  mixed
      * @throws  ParameterNotFoundException
      * @throws  ParameterValueException
      */
-    public static function getQueryOrderedAndLimited($query, $filters = null)
+    public static function getQueryOrderedAndLimited($queryBuilder, $queries = null)
     {
-        if(! $filters) return $query;
+        if(! $queries) return $queryBuilder;
 
         // sentences for order query and limited
-        foreach ($filters as $sql)
+        foreach ($queries as $query)
         {
-            if(! isset($sql['command']))
-                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($sql));
+            if(! isset($query['command']))
+                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
 
-            if(($sql['command'] === "offset" || $sql['command'] === "limit") && ! isset($sql['value']))
-                throw new ParameterNotFoundException('Parameter value not found in request, please set value parameter in: ' . json_encode($sql));
+            if(($query['command'] === "OFFSET" || $query['command'] === "LIMIT") && ! isset($query['value']))
+                throw new ParameterNotFoundException('Parameter value not found in request, please set value parameter in: ' . json_encode($query));
 
-            switch ($sql['command']) {
-                case 'where':
+            switch ($query['command']) {
+                case 'WHERE':
                 case 'orWhere';
                 case 'whereIn';
                 case 'whereJsonContains';
                     // commands not accepted, already
                     // implemented in Quasar\Core\Services\SQLService::setQueryFilter method
                     break;
-                case 'orderBy':
-                    $query->orderBy($sql['column'], $sql['operator']);
+                case 'ORDER_BY':
+                    $queryBuilder->orderBy($query['column'], $query['operator']);
                     break;
-                case 'offset':
-                    $query->offset($sql['value']);
+                case 'OFFSET':
+                    $queryBuilder->offset($query['value']);
                     break;
-                case 'limit':
-                    $query->limit($sql['value']);
+                case 'LIMIT':
+                    $queryBuilder->limit($query['value']);
                     break;
 
                 default:
@@ -307,7 +307,7 @@ class SQLService
             }
         }
 
-        return $query;
+        return $queryBuilder;
     }
 
     /**

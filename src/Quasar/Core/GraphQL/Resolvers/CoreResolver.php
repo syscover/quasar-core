@@ -23,7 +23,7 @@ abstract class CoreResolver
     public function paginate($root, array $args)
     {
         return (Object) [
-            'query' => $this->model->calculateFoundRows()->builder()
+            'queryBuilder' => $this->model->calculateFoundRows()->builder()
         ];
     }
 
