@@ -7,7 +7,7 @@ class PaginationResolver
 {
     public function total($root, array $args)
     {
-        $total = SQLService::countPaginateTotalRecords($root->queryBuilder);
+        $total = SQLService::count($root->queryBuilder);
 
         // to count elements, if sql has a groupBy statement, count function always return 1
         // check if total is equal to 1, execute FOUND_ROWS() to guarantee the real result
@@ -25,10 +25,10 @@ class PaginationResolver
         $queryBuilder   = $root->queryBuilder->setEagerLoads([]);
 
         // get query builder filtered by sql statement and filtered by filters statement
-        $queryBuilder = SQLService::getQueryFiltered($queryBuilder, $args['query'] ?? null, $args['filters'] ?? null);
+        $queryBuilder = SQLService::makeQueryBuilder($queryBuilder, $args['query'] ?? null);
 
         // get query ordered and limited
-        $queryBuilder = SQLService::getQueryOrderedAndLimited($queryBuilder, $args['query'] ?? null);
+        $queryBuilder = SQLService::makeQueryBuilderOrderedAndLimited($queryBuilder, $args['query'] ?? null);
 
         // get objects filtered
         $objects = $queryBuilder->get();

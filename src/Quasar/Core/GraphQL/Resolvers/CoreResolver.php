@@ -13,8 +13,8 @@ abstract class CoreResolver
 
         if(isset($args['sql']))
         {
-            $query = SQLService::getQueryFiltered($query, $args['sql'], $args['filters'] ?? null);
-            $query = SQLService::getQueryOrderedAndLimited($query, $args['sql'], $args['filters'] ?? null);
+            $query = SQLService::makeQueryBuilder($query, $args['query']);
+            $query = SQLService::makeQueryBuilderOrderedAndLimited($query, $args['query']);
         }
 
         return $query->get();
@@ -29,7 +29,7 @@ abstract class CoreResolver
 
     public function find($root, array $args)
     {
-        $query = SQLService::getQueryFiltered($this->model->builder(), $args['sql'], $args['filters'] ?? null);
+        $query = SQLService::makeQueryBuilder($this->model->builder(), $args['query']);
 
         return $query->first();
     }
@@ -41,12 +41,12 @@ abstract class CoreResolver
 
     public function update($root, array $args)
     {
-        return $this->service->update($args['payload'], $args['payload']['id']);
+        return $this->service->update($args['payload'], $args['payload']['uuid']);
     }
 
     public function delete($root, array $args)
     {
-        $object = SQLService::deleteRecord($args['id'], get_class($this->model), $args['lang_id'] ?? null, $args['lang_class'] ?? null);
+        $object = SQLService::deleteRecord($args['uuid'], get_class($this->model), $args['common_uuid'] ?? null, $args['lang_class'] ?? null);
 
         return $object;
     }

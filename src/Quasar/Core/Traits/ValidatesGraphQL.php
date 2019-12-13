@@ -6,7 +6,7 @@ use Illuminate\Validation\ValidationException;
 /**
  * Trait ValidatesGraphQL
  *
- * Trait generated from Illuminate\Foundation\Validation/ValidatesRequests to replace request by dara array
+ * Trait generated from Illuminate\Foundation\Validation\ValidatesRequests to replace request by data array
  * @package Quasar\Core\Traits
  */
 trait ValidatesGraphQL

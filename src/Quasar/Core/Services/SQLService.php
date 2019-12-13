@@ -10,48 +10,21 @@ use Quasar\Core\Exceptions\ParameterValueException;
  */
 class SQLService
 {
-    /**
-     * Get query apply sql or filters
-     *
-     * @param $query
-     * @param array $sql
-     * @param null $filters
-     * @return mixed
-     */
-    public static function getGroupQueryFiltered($query, $sql = null, $filters = null)
-    {
-        if(! $sql) $sql = [];
-
-        // filter all data by lang
-        if(isset($filters) && is_array($filters))
-        {
-            // filter query
-            $query = SQLService::setGroupQueryFilter($query, $filters);
-
-            // apply query parameters over filter
-            $query->where(function ($query) use ($sql) {
-                SQLService::setGroupQueryFilter($query, $sql);
-            });
-        }
-        else
-        {
-            $query = SQLService::setGroupQueryFilter($query, $sql);
-        }
-
-        return $query;
-    }
+    const OPERATORS = [
+        'EQUALS'    => '=',
+        'IS_NULL'   => 'IS NULL'
+    ];
 
     /**
-     * @param $query
-     * @param null $filters sql to filter total count
+     * @param $queryBuilder
+     * @param null $query sql to filter total count
      * @return mixed
      */
-    public static function countGroupPaginateTotalRecords($query, $filters = null)
+    public static function countGroupPaginateTotalRecords($queryBuilder, array $queries = null)
     {
-        if(isset($filters))
-            $query = SQLService::setGroupQueryFilter($query, $filters);
+        if($queries && is_array($queries)) $queryBuilder = SQLService::setQueryGroup($queryBuilder, $queries);
 
-        return $query->count();
+        return $queryBuilder->count();
     }
 
     /**
@@ -97,7 +70,7 @@ class SQLService
      *      ]
      *  ];
      */
-    public static function setGroupQueryFilter($queryBuilder, $query)
+    public static function setQueryGroup($queryBuilder, array $query)
     {
         if(isset($query['type']))
         {
@@ -148,13 +121,13 @@ class SQLService
                     if($query['type'] === 'AND')
                     {
                         $queryBuilder->where(function ($queryBuilder) use ($sql) {
-                            self::setGroupQueryFilter($queryBuilder, $sql);
+                            self::setQueryGroup($queryBuilder, $sql);
                         });
                     }
                     elseif ($query['type'] === 'OR')
                     {
                         $queryBuilder->orWhere(function ($queryBuilder) use ($sql) {
-                            self::setGroupQueryFilter($queryBuilder, $sql);
+                            self::setQueryGroup($queryBuilder, $sql);
                         });
                     }
                 }
@@ -164,65 +137,31 @@ class SQLService
         return $queryBuilder;
     }
 
-    /**
-     * DEPRECATED by getGroupQueryFiltered
-     * Get query apply sql or filters
-     *
-     * @param $query
-     * @param array $sql
-     * @param null $filters
-     * @return mixed
-     * @throws ParameterNotFoundException
-     * @throws ParameterValueException
-     */
-    public static function getQueryFiltered($query, $sql = null, $filters = null)
-    {
-        if(! $sql) $sql = [];
-
-        // filter all data by lang
-        if(isset($filters) && is_array($filters))
-        {
-            // filter query
-            $query = SQLService::setQueryFilter($query, $filters);
-
-            // apply query parameters over filter
-            $query->where(function ($query) use ($sql) {
-                SQLService::setQueryFilter($query, $sql);
-            });
-        }
-        else
-        {
-            $query = SQLService::setQueryFilter($query, $sql);
-        }
-
-        return $query;
-    }
+    
 
     /**
      * DEPRECATED by countGroupPaginateTotalRecords
-     * @param $query
-     * @param null $filters sql to filter total count
+     * @param $queryBuilder
+     * @param null $queries sql to filter total count
      * @return mixed
      * @throws ParameterNotFoundException
      * @throws ParameterValueException
      */
-    public static function countPaginateTotalRecords($query, $filters = null)
+    public static function count($queryBuilder, $queries = null)
     {
-        if(isset($filters))
-            $query = SQLService::setQueryFilter($query, $filters);
+        if($queries && is_array($queries)) $queryBuilder = SQLService::setQueryFilter($queryBuilder, $queries);
 
-        return $query->count();
+        return $queryBuilder->count();
     }
 
-    /**
-     * DEPRECATED by setGroupQueryFilter
+    /*/
      * @param $queryBuilder
      * @param $queries
      * @return mixed
      * @throws ParameterNotFoundException
      * @throws ParameterValueException
      */
-    public static function setQueryFilter($queryBuilder, $queries)
+    public static function makeQueryBuilder($queryBuilder, $queries)
     {
         // commands without pagination and limit
         foreach ($queries as $query)
@@ -244,7 +183,7 @@ class SQLService
                     // commands not accepted
                     break;
                 case 'WHERE':
-                    $queryBuilder->where($query['column'], $query['operator'], $query['value']);
+                    $queryBuilder->where($query['column'], self::OPERATORS[$query['operator']], $query['value']);
                     break;
                 case 'orWhere':
                     $queryBuilder->orWhere($query['column'], $query['operator'], $query['value']);
@@ -271,7 +210,7 @@ class SQLService
      * @throws  ParameterNotFoundException
      * @throws  ParameterValueException
      */
-    public static function getQueryOrderedAndLimited($queryBuilder, $queries = null)
+    public static function makeQueryBuilderOrderedAndLimited($queryBuilder, $queries = null)
     {
         if(! $queries) return $queryBuilder;
 
@@ -311,18 +250,18 @@ class SQLService
     }
 
     /**
-     * @param int           $id
+     * @param int           $uuid
      * @param string        $modelClassName
-     * @param string|null   $langId
-     * @param string|null   $modelLangClassName
+     * @param string|null   $commonUuid
+     * @param string|null   $commonClassName
      * @param array         $filters            filters to select and delete records
      * @return mixed
      */
     public static function deleteRecord(
-        $id,
+        $uuid,
         string $modelClassName,
-        string $langId = null,
-        string $modelLangClassName = null,
+        string $commonUuid = null,
+        string $commonClassName = null,
         array $filters = []
     )
     {
@@ -335,31 +274,31 @@ class SQLService
          *  Delete object with lang.
          *  If destroy baseLang object, delete all objects with this id
          */
-        if(isset($langId))
+        if(isset($commonUuid))
         {
             /**
-             * Check if controller has defined $modelLangClassName property,
-             * if has $modelLangClassName, this means that the translations are in another table.
+             * Check if controller has defined $commonClassName property,
+             * if has $commonClassName, this means that the translations are in another table.
              * Get table name to do the query
              */
-            if($modelLangClassName !== null)
+            if($commonClassName !== null)
             {
                 // get data to do model queries
-                $modelLang      = new $modelLangClassName;
-                $tableLang      = $modelLang->getTable();
+                $commonModel    = new $commonClassName;
+                $commonTable    = $commonModel->getTable();
 
                 // get object from main table and lang table
                 // in builder method do the join between table and table lang
                 $object = $model->builder()
-                    ->where($tableLang . '.lang_id', $langId)
-                    ->where($table . '.id', $id)
+                    ->where($commonTable . '.common_uuid', $commonUuid)
+                    ->where($table . '.uuid', $uuid)
                     ->first();
 
                 // check if must delete base_lang object
-                if(base_lang() === $langId)
+                if(base_lang() === $commonUuid)
                 {
                     // Delete record from main table and delete records in table lang by relations
-                    $model::where($table . '.id', $id)
+                    $model::where($table . '.uuid', $uuid)
                         ->delete();
 
                     return $object;
@@ -369,19 +308,19 @@ class SQLService
                  * This option is for tables that dependent of other tables to set your languages
                  * set parameter $deleteLangDataRecord to false, because lang model haven't data_lag column
                  */
-                $modelLang->deleteTranslationRecord($id, $langId, false);
+                $commonModel->deleteTranslationRecord($uuid, $commonUuid, false);
 
                 /**
                  * This kind of tables has field data_lang in main table, not in lang table
                  * delete data_lang parameter
                  */
-                $model->deleteDataLang($langId, $id, 'id');
+                $model->deleteDataLang($commonUuid, $uuid, 'id');
 
                 /**
                  * Count records, to know if has more lang
                  */
-                $nRecords = $modelLang->builder()
-                    ->where($tableLang . '.id', $id)
+                $nRecords = $commonModel->builder()
+                    ->where($commonTable . '.uuid', $uuid)
                     ->count();
 
                 /**
@@ -389,7 +328,7 @@ class SQLService
                  */
                 if($nRecords === 0)
                 {
-                    $model->where($table . '.' . $primaryKey, $id)
+                    $model->where($table . '.' . $primaryKey, $uuid)
                         ->delete();
                 }
 
@@ -398,44 +337,119 @@ class SQLService
             else
             {
                 $query = $model->builder()
-                    ->where($table . '.id', $id);
+                    ->where($table . '.uuid', $uuid);
 
                 /**
-                 * The table may have lang parameter but not have the field lang_id.
+                 * The table may have lang parameter but not have the field common_uuid.
                  * Whe is false, the model overwrite method deleteTranslationRecord
                  * to delete json language field, for example in field table with labels column
                  */
-                if(Schema::hasColumn($table, 'lang_id')) $query->where($table . '.lang_id', $langId);
+                if(Schema::hasColumn($table, 'common_uuid')) $query->where($table . '.common_uuid', $commonUuid);
 
                 $object = $query->filterQuery($filters)->first();
 
                 // check if must delete base_lang object
-                if(base_lang() === $langId)
+                if(base_lang() === $commonUuid)
                 {
                     // Delete record from main table and delete records in table lang by relations
-                    $model::where($table . '.id', $id)
+                    $model::where($table . '.uuid', $uuid)
                         ->delete();
 
                     return $object;
                 }
 
                 // delete record from table without dependency from other table lang
-                $model->deleteTranslationRecord($id, $langId, true, $filters);
+                $model->deleteTranslationRecord($uuid, $commonUuid, true, $filters);
 
                 return $object;
             }
         }
         else
         {
+            // Delete single record
             $object = $model->builder()
-                    ->where($table . '.id', $id)
+                    ->where($table . '.uuid', $uuid)
                     ->filterQuery($filters)
                     ->first();
 
-            // Delete single record
             $object->delete();
 
             return $object;
         }
+    }
+
+
+
+
+
+
+    /**
+     * DEPRECATED
+     */
+
+    /**
+     * DEPRECATED
+     * Get query apply sql or filters
+     *
+     * @param $query
+     * @param array $sql
+     * @param null $filters
+     * @return mixed
+     */
+    public static function getGroupQueryFiltered($query, $sql = null, $filters = null)
+    {
+        if(! $sql) $sql = [];
+
+        // filter all data by lang
+        if(isset($filters) && is_array($filters))
+        {
+            // filter query
+            $query = SQLService::setQueryGroup($query, $filters);
+
+            // apply query parameters over filter
+            $query->where(function ($query) use ($sql) {
+                SQLService::setQueryGroup($query, $sql);
+            });
+        }
+        else
+        {
+            $query = SQLService::setQueryGroup($query, $sql);
+        }
+
+        return $query;
+    }
+
+    /**
+     * DEPRECATED by getGroupQueryFiltered
+     * Get query apply sql or filters
+     *
+     * @param $queryBuilder
+     * @param array $query
+     * @param null $constraints
+     * @return mixed
+     * @throws ParameterNotFoundException
+     * @throws ParameterValueException
+     */
+    public static function getQueryFiltered($queryBuilder, array $query = null, array $constraints = null)
+    {
+        if(! $query) $query = [];
+
+        // filter all data by lang
+        if($constraints && is_array($constraints))
+        {
+            // filter query
+            $queryBuilder = SQLService::setQueryFilter($queryBuilder, $constraints);
+
+            // apply query parameters over filter
+            $queryBuilder->where(function ($queryBuilder) use ($query) {
+                SQLService::setQueryFilter($queryBuilder, $query);
+            });
+        }
+        else
+        {
+            $queryBuilder = SQLService::setQueryFilter($queryBuilder, $query);
+        }
+
+        return $queryBuilder;
     }
 }
