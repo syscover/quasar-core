@@ -11,7 +11,7 @@ abstract class CoreResolver
     {
         $query = $this->model->builder();
 
-        if(isset($args['sql']))
+        if(isset($args['query']))
         {
             $query = SQLService::makeQueryBuilder($query, $args['query']);
             $query = SQLService::makeQueryBuilderOrderedAndLimited($query, $args['query']);
