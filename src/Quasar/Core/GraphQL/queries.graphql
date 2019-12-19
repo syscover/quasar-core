@@ -1,0 +1,3 @@
+# Config
+""" Query to get config files from laravel """
+config(config:ConfigInput): [JSON!]! @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\ConfigResolver@index")

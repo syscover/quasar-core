@@ -9,3 +9,14 @@ input QueryStatementInput
     """ Value for statement """
     value: Any
 }
+
+""" Input to request config value """
+input ConfigInput 
+{
+    """ String to access to config """
+    key: String!
+    """ Lang that will be translated config property """
+    lang: String
+    """ Property from object that will be translated """
+    property: String
+}
