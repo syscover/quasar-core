@@ -3,92 +3,62 @@
 trait CanManageDataLang
 {
     /**
-     * Function to add lang record from json field
+     * Function to add lang record to data_lang column
      *
      * @access	public
-     * @param   string     $langId
-     * @param   int     $id
-     * @param   array   $filters            filters to select and updates records
-     * @return	string
      */
-    public static function getDataLang(
-        string $langId,
-        $id = null,
-        array $filters = []
-    )
+    public function addDataLang()
     {
-        // if id is equal to null, is a new object
-        if($id === null) 
+        // create static model instance
+        $model = new static;
+        $dataLang = [];
+
+        $n = $model::where('common_uuid', $this->commonUuid)->count();
+
+        if ($n === 1)
         {
-            $json[] = $langId;
+            $dataLang[] = $this->langUuid;
         }
         else
         {
-            $instance   = new static;
-
-            // get the first record, record previous to recent record
-            $object = $instance::where('id', $id)
-                ->filterQuery($filters)
+            // get record with the same common uuid
+            $object = $model::where('common_uuid', $this->commonUuid)
+                ->where('uuid', '<>', $this->uuid)
                 ->first();
+            
+            // get data_lang from object, check that has array in data_lang column
+            $dataLang = is_array($object->dataLang) ? $object->dataLang : [];
 
-            if($object !== null)
-            {
-                // get data_lang from object, check that has array in data_lang column
-                $json = is_array($object->data_lang)? $object->data_lang : [];
-
-                // add new language
-                $json[] = $langId;
-
-                // updates all objects with new language variables
-                $instance::where($object->table . '.id', $object->id)
-                    ->filterQuery($filters)
-                    ->update([
-                        'data_lang' => json_encode($json)
-                    ]);
-            }
-            else
-            {
-                $json[] = $langId;
-            }
+            // add new language
+            $dataLang[] = $this->langUuid;
         }
 
-        return $json;
+        // updates all objects with new language variables
+        $model::where('common_uuid', $this->commonUuid)
+            ->update([
+                'data_lang' => json_encode($dataLang)
+            ]);
     }
 
     /**
-     * Function to delete lang record from json field
+     * Function to delete lang record from data_lang column
      *
-     * @param   string  $langId
-     * @param   int     $id
-     * @param   string  $dataLangModelId  id column from table thar contain data_lang column, may be ix or id like product table
+     * @param   string  $langUuid
+     * @param   string  $uuid
      */
-    public static function deleteDataLang(
-        $langId,
-        $id,
-        $dataLangModelId = 'id'
-    )
+    public function deleteDataLang()
     {
-        $instance   = new static;
-        $object     = $instance::where($dataLangModelId, $id)->first();
+        // create static model instance
+        $instance = new static;
+        
+        $dataLang = $this->dataLang;
 
-        if($object != null)
-        {
-            $json = $object->data_lang;
-
-            // unset isn't correct, get error to reorder array
-            $langArray = [];
-            foreach($json as $jsonLang)
-            {
-                if($jsonLang != $langId)
-                {
-                    $langArray[] = $jsonLang;
-                }
-            }
-
-            $instance::where($object->table . '.' . $dataLangModelId, $id)
-                ->update([
-                    'data_lang' => json_encode($langArray)
-                ]);
-        }
+        $index = array_search($this->langUuid, $this->dataLang);
+        array_splice($dataLang, $index, 1);
+            
+        $instance::where('common_uuid', $this->commonUuid)
+            ->update([
+                'data_lang' => json_encode($dataLang)
+            ]);
     }
 }

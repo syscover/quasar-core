@@ -8,6 +8,8 @@ class ConfigResolver
     {
         $config = config($args['config']['key']);
 
+        if (!$config) throw new \Error('Config file "' . $args['config']['key'] . '" doesn\'t exist.');
+
         if(isset($args['config']['lang']) && isset($args['config']['property']))
         {
             // set lang
