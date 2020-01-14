@@ -3,7 +3,6 @@
 use Illuminate\Support\Facades\Schema;
 use Quasar\Core\Exceptions\ParameterNotFoundException;
 use Quasar\Core\Exceptions\ParameterValueException;
-use Quasar\Admin\Models\Lang;
 
 /**
  * Class SQLService

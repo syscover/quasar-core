@@ -1,3 +1,7 @@
 # Config
 """ Query to get config files from laravel """
 config(config:ConfigInput): [JSON!]! @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\ConfigResolver@index")
+
+# Slug
+""" Query to get slug """
+slug(model:String! slug:String! uuid:ID column:String langUuid:ID): String @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\SlugResolver@index")
