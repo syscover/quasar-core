@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Quasar\Core\Exceptions\ParameterNotFoundException;
 use Quasar\Core\Exceptions\ParameterValueException;
+use Quasar\Admin\Models\Lang;
 
 /**
  * Class SQLService
@@ -137,8 +138,6 @@ class SQLService
         return $queryBuilder;
     }
 
-    
-
     /**
      * DEPRECATED by countGroupPaginateTotalRecords
      * @param $queryBuilder
@@ -254,48 +253,46 @@ class SQLService
      * @param string        $modelClassName
      * @param string|null   $commonUuid
      * @param string|null   $commonClassName
-     * @param array         $filters            filters to select and delete records
      * @return mixed
      */
     public static function deleteRecord(
-        $uuid,
+        string $uuid,
         string $modelClassName,
-        string $commonUuid = null,
-        string $commonClassName = null,
-        array $filters = []
+        string $langUuid = null,
+        string $langModelClassName = null
     )
     {
         // get data to do model queries
         $model      = new $modelClassName;
         $table      = $model->getTable();
         $primaryKey = $model->getKeyName();
+        $object     = $model->builder()
+                    ->where($table . '.uuid', $uuid)
+                    ->first();
 
-        /**
-         *  Delete object with lang.
-         *  If destroy baseLang object, delete all objects with this id
-         */
-        if(isset($commonUuid))
+        // Check if object has a langUuid, to know if has multiple languages
+        if (isset($langUuid))
         {
             /**
-             * Check if controller has defined $commonClassName property,
-             * if has $commonClassName, this means that the translations are in another table.
+             * Check if controller has defined $langModelClassName property,
+             * if has $langModelClassName, this means that the translations are in another table.
              * Get table name to do the query
              */
-            if($commonClassName !== null)
+            if ($langModelClassName)
             {
                 // get data to do model queries
-                $commonModel    = new $commonClassName;
-                $commonTable    = $commonModel->getTable();
+                $langModel    = new $langModelClassName;
+                $langTable    = $langModel->getTable();
 
                 // get object from main table and lang table
                 // in builder method do the join between table and table lang
                 $object = $model->builder()
-                    ->where($commonTable . '.common_uuid', $commonUuid)
+                    ->where($langTable . '.lang_uuid', $langUuid)
                     ->where($table . '.uuid', $uuid)
                     ->first();
 
                 // check if must delete base_lang object
-                if(base_lang() === $commonUuid)
+                if(base_lang_uuid() === $langUuid)
                 {
                     // Delete record from main table and delete records in table lang by relations
                     $model::where($table . '.uuid', $uuid)
@@ -331,37 +328,21 @@ class SQLService
                     $model->where($table . '.' . $primaryKey, $uuid)
                         ->delete();
                 }
-
-                return $object;
             }
             else
             {
-                $query = $model->builder()
-                    ->where($table . '.uuid', $uuid);
-
-                /**
-                 * The table may have lang parameter but not have the field common_uuid.
-                 * Whe is false, the model overwrite method deleteTranslationRecord
-                 * to delete json language field, for example in field table with labels column
-                 */
-                if(Schema::hasColumn($table, 'common_uuid')) $query->where($table . '.common_uuid', $commonUuid);
-
-                $object = $query->filterQuery($filters)->first();
-
                 // check if must delete base_lang object
-                if(base_lang() === $commonUuid)
+                if (base_lang_uuid() === $langUuid)
                 {
-                    // Delete record from main table and delete records in table lang by relations
-                    $model::where($table . '.uuid', $uuid)
-                        ->delete();
-
-                    return $object;
+                    // Delete records from same common uuid by delete main language
+                    $model::where($table . '.common_uuid', $object->commonUuid)->delete();
                 }
-
-                // delete record from table without dependency from other table lang
-                $model->deleteTranslationRecord($uuid, $commonUuid, true, $filters);
-
-                return $object;
+                else
+                {
+                    // delete record from table without dependency from other table lang
+                    $object->delete();
+                    $object->deleteDataLang();
+                }
             }
         }
         else
@@ -369,13 +350,12 @@ class SQLService
             // Delete single record
             $object = $model->builder()
                     ->where($table . '.uuid', $uuid)
-                    ->filterQuery($filters)
                     ->first();
 
             $object->delete();
-
-            return $object;
         }
+
+        return $object;
     }
 
 
