@@ -4,3 +4,9 @@ type Pagination
     filtered: Int @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@filtered")
     objects(query:[QueryStatementInput] filters:[QueryStatementInput]): [JSON] @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@objects")
 }
+
+type Translation
+{
+    langUuid: ID!
+    value: String!
+}
