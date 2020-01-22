@@ -34,5 +34,12 @@
         "files": [
             "src/helpers.php"
         ]
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Quasar\\Core\\CoreServiceProvider"
+            ]
+        }
     }
 }
