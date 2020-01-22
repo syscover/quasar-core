@@ -27,36 +27,7 @@ Quasar\Core\CoreServiceProvider::class,
 php artisan vendor:publish --provider="Quasar\Core\CoreServiceProvider"
 ```
 
-**3 - And execute migrations**
-```
-php artisan migrate
-```
-
-**4 - Execute command to create encryption keys fot laravel passport**
-```
-php artisan passport:install
-```
-
-**5 - Add Passport::routes method within the boot method of your app/Providers/AuthServiceProvider**
-
-This method will register the routes necessary to issue access tokens and revoke access tokens, clients, and personal access tokens
-```
-use Laravel\Passport\Passport;
-
-/**
- * Register any authentication / authorization services.
- *
- * @return void
- */
-public function boot()
-{
-    $this->registerPolicies();
-    
-    Passport::routes();  // add laravel passport routes
-}
-```
-
-**6 - Don't forget to register CORS in your server, the following example is for apache server**
+**3 - Don't forget to register CORS in your server, the following example is for apache server**
 ```
 Header add Access-Control-Allow-Origin "*"
 Header add Access-Control-Allow-Headers "authorization, origin, x-requested-with, content-type"
@@ -64,17 +35,26 @@ Header add Access-Control-Expose-Headers "authorization"
 Header add Access-Control-Allow-Methods "PUT, GET, POST, DELETE, OPTIONS"
 ```
 
-**7 - You may need to extend both the PHP memory on your server as well as the upload limit**
+**4 - You may need to extend both the PHP memory on your server as well as the upload limit**
 ```
 php_value post_max_size 1000M
 php_value upload_max_filesize 1000M
 php_value memory_limit 256M
 ```
 
-**8 - create link to storage folder**
+**5 - create link to storage folder**
 ```
 php artisan storage:link
 ```
+
+XXXXX
+
+
+
+
+
+
+
 
 **9 - Execute publish command**
 ```
@@ -86,7 +66,7 @@ php artisan vendor:publish --provider="Syscover\Core\CoreServiceProvider"
 
 In config/lighthouse.php add to route => middleware array
 ```
-'middleware' => ['api', 'client'],
+'middleware' => ['api'],
 ```
 
 and add the validation handler in error_handlers
