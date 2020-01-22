@@ -54,21 +54,20 @@ trait CanManageCrud
     }
 
     /**
-     * @param   $id
-     * @param   $langId
+     * @param   string $uuid
+     * @param   string $langUuid
      * @param   bool $deleteLangDataRecord
      * @param   array $filters  filters to select and delete records
      * @return	void
      */
-    public static function deleteTranslationRecord($id, $langId, $deleteLangDataRecord = true, $filters = [])
+    /* public static function deleteTranslationRecord($object, $deleteLangDataRecord = true, $filters = [])
     {
         $instance = new static;
 
-        $instance::where('id', $id)
-            ->where('lang_id', $langId)
+        $instance::where('uuid', $uuid)
             ->filterQuery($filters)
             ->delete();
 
-        if($deleteLangDataRecord) $instance::deleteDataLang($langId, $id);
-    }
+        if ($deleteLangDataRecord) $object->deleteDataLang();
+    } */
 }
