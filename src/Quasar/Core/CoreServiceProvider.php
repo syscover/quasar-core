@@ -13,6 +13,7 @@ class CoreServiceProvider extends ServiceProvider
 	{
         // register config
         $this->publishes([
+            __DIR__ . '/../../config/lighthouse.php' => config_path('lighthouse.php'),
             __DIR__ . '/../../config/quasar-core.php' => config_path('quasar-core.php')
         ], 'config');
 	}
