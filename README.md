@@ -25,6 +25,15 @@ php artisan storage:link
 ```
 
 ## Tips
+**1 - Don't forget config environment variables database**
+```
+DB_CONNECTION=mysql
+DB_HOST=127.0.0.1
+DB_PORT=33001
+DB_DATABASE=quasar
+DB_USERNAME=root
+DB_PASSWORD=123456
+```
 
 **1 - Don't forget to register CORS in your server, the following example is for apache server**
 ```
