@@ -2,9 +2,12 @@ enum Command
 {
     COUNT
     LIMIT
+    OR_WHERE
     OFFSET
     ORDER_BY
     WHERE
+    WHERE_IN
+    WHERE_JSON_CONTAINS
 }
 
 enum Operator 

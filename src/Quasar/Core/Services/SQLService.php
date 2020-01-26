@@ -183,13 +183,13 @@ class SQLService
                 case 'WHERE':
                     $queryBuilder->where($query['column'], self::OPERATORS[$query['operator']], $query['value']);
                     break;
-                case 'orWhere':
+                case 'OR_WHERE':
                     $queryBuilder->orWhere($query['column'], $query['operator'], $query['value']);
                     break;
-                case 'whereIn':
+                case 'WHERE_IN':
                     $queryBuilder->whereIn($query['column'], $query['value']);
                     break;
-                case 'whereJsonContains':
+                case 'WHERE_JSON_CONTAINS':
                     $queryBuilder->whereJsonContains($query['column'], $query['value']);
                     break;
 
@@ -223,9 +223,9 @@ class SQLService
 
             switch ($query['command']) {
                 case 'WHERE':
-                case 'orWhere';
-                case 'whereIn';
-                case 'whereJsonContains';
+                case 'OR_WHERE';
+                case 'WHERE_IN';
+                case 'WHERE_JSON_CONTAINS';
                     // commands not accepted, already
                     // implemented in Quasar\Core\Services\SQLService::setQueryFilter method
                     break;
