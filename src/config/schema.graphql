@@ -1,12 +1,12 @@
 # Core
-#import ./../workbench/quasar/core/src/Quasar/Core/GraphQL/enums.graphql
-#import ./../workbench/quasar/core/src/Quasar/Core/GraphQL/scalars.graphql
-#import ./../workbench/quasar/core/src/Quasar/Core/GraphQL/inputs.graphql
-#import ./../workbench/quasar/core/src/Quasar/Core/GraphQL/types.graphql
+#import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/enums.graphql
+#import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/scalars.graphql
+#import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/inputs.graphql
+#import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/types.graphql
 
 # Admin
-#import ./../workbench/quasar/admin/src/Quasar/Admin/GraphQL/inputs.graphql
-#import ./../workbench/quasar/admin/src/Quasar/Admin/GraphQL/types.graphql
+#import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/inputs.graphql
+#import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/types.graphql
 
 # Add here other schemas
 
@@ -14,10 +14,10 @@
 type Query 
 {
     # Core
-    #import ./../workbench/quasar/core/src/Quasar/Core/GraphQL/queries.graphql
+    #import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/queries.graphql
 
     # Admin
-    #import ./../workbench/quasar/admin/src/Quasar/Admin/GraphQL/queries.graphql
+    #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/queries.graphql
 
     # Add here other queries
 
@@ -26,7 +26,7 @@ type Query
 type Mutation 
 {
     # Admin
-    #import ./../workbench/quasar/admin/src/Quasar/Admin/GraphQL/mutations.graphql
+    #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/mutations.graphql
 
     # Add here other mutatios
 }
