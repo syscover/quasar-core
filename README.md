@@ -29,10 +29,10 @@ php artisan storage:link
 ```
 DB_CONNECTION=mysql
 DB_HOST=127.0.0.1
-DB_PORT=33001
-DB_DATABASE=quasar
+DB_PORT=3306
+DB_DATABASE=laravel
 DB_USERNAME=root
-DB_PASSWORD=123456
+DB_PASSWORD=
 ```
 
 **1 - Don't forget to register CORS in your server, the following example is for apache server**
