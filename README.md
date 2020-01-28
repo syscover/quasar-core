@@ -6,11 +6,6 @@
 Quasar is a application that generates a control panel where you can create custom solutions.
 
 ---
-
-## Server Requirements
-
-* PHP >= 7.3.0
-
 ## Installation
 
 **1 - After install Laravel framework, execute on console:**
