@@ -38,6 +38,9 @@ trait CanManageDataLang
             ->update([
                 'data_lang' => json_encode($dataLang)
             ]);
+        
+        // set data lang field
+        $this->dataLang = $dataLang;
     }
 
     /**
