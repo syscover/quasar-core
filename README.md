@@ -49,3 +49,9 @@ php_value upload_max_filesize 1000M
 php_value memory_limit 256M
 ```
 
+**3 - Testing**
+To run laravel testing
+```
+./vendor/bin/phpunit
+```
+
