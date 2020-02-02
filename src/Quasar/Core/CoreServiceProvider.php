@@ -20,8 +20,13 @@ class CoreServiceProvider extends ServiceProvider
 
         // publish schema
         $this->publishes([
-            __DIR__.'/../../config/schema.graphql' => $configRepository->get('lighthouse.schema.register'),
+            __DIR__ . '/../../config/schema.graphql' => $configRepository->get('lighthouse.schema.register'),
         ], 'schema');
+
+        // publish test
+        $this->publishes([
+            __DIR__ . '/../../tests/Unit' => base_path('tests/Unit'),
+        ], 'tests');
 	}
 
 	/**
