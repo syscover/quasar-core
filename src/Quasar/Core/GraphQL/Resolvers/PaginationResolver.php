@@ -7,7 +7,14 @@ class PaginationResolver
 {
     public function total($root, array $args)
     {
-        $total = SQLService::count($root->queryBuilder);
+        // save eager loads to load after execute FOUND_ROWS() MySql Function
+        // FOUND_ROWS function get total number rows of last query, if model has eagerLoads, after execute the query model,
+        // will execute eagerLoads losing the reference os last query to execute FOUND_ROWS() MySql Function
+        $eagerLoads     = $root->queryBuilder->getEagerLoads();
+        $queryBuilder   = $root->queryBuilder->setEagerLoads([]);
+
+        // count total objects with constraints
+        $total = SQLService::makeQueryBuilder($queryBuilder, $args['constraints'] ?? null)->count();
 
         // to count elements, if sql has a groupBy statement, count function always return 1
         // check if total is equal to 1, execute FOUND_ROWS() to guarantee the real result
@@ -18,6 +25,8 @@ class PaginationResolver
 
     public function objects($root, array $args)
     {
+        //ATTENTION, this queryBuilder keep constraints applied in total method
+        
         // save eager loads to load after execute FOUND_ROWS() MySql Function
         // FOUND_ROWS function get total number rows of last query, if model has eagerLoads, after execute the query model,
         // will execute eagerLoads losing the reference os last query to execute FOUND_ROWS() MySql Function

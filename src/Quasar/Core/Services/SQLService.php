@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Schema;
 use Quasar\Core\Exceptions\ParameterNotFoundException;
 use Quasar\Core\Exceptions\ParameterValueException;
+use Quasar\Core\Support\Operator;
 
 /**
  * Class SQLService
@@ -10,10 +11,64 @@ use Quasar\Core\Exceptions\ParameterValueException;
  */
 class SQLService
 {
-    const OPERATORS = [
-        'EQUALS'    => '=',
-        'IS_NULL'   => 'IS NULL'
-    ];
+    /*
+     * @param \Illuminate\Database\Eloquent\Builder $queryBuilder
+     * @param array                                 $queries
+     * @return mixed
+     * @throws ParameterNotFoundException
+     * @throws ParameterValueException
+     */
+    public static function makeQueryBuilder($queryBuilder, $queries = [])
+    {
+        // queries less OFFSET, LIMIT and ORDER_BY
+        foreach ($queries as $query)
+        {
+            if(! isset($query['command']))
+                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
+
+            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['column']))
+                throw new ParameterNotFoundException('Parameter column not found in request, please set column parameter in ' . json_encode($query));
+
+            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['operator']))
+                throw new ParameterNotFoundException('Parameter operator not found in request, please set operator parameter in ' . json_encode($query));
+
+            switch ($query['command'])
+            {
+                case 'OFFSET':
+                case 'LIMIT':
+                case 'ORDER_BY':
+                    // commands not accepted
+                    break;
+                case 'WHERE':
+                    $queryBuilder->where($query['column'], Operator::${$query['operator']}, $query['value']);
+                    break;
+                case 'OR_WHERE':
+                    $queryBuilder->orWhere($query['column'], $query['operator'], $query['value']);
+                    break;
+                case 'WHERE_IN':
+                    $queryBuilder->whereIn($query['column'], $query['value']);
+                    break;
+                case 'WHERE_JSON_CONTAINS':
+                    $queryBuilder->whereJsonContains($query['column'], $query['value']);
+                    break;
+
+                default:
+                    throw new ParameterValueException('command parameter has a incorrect value, must to be where');
+            }
+        }
+
+        return $queryBuilder;
+    }
+
+    
+
+
+
+    
+
+
+
+
 
     /**
      * @param $queryBuilder
@@ -56,7 +111,7 @@ class SQLService
      *                  'type'  => 'or', // operator between sql
      *                  'sql'   => [
      *                      [
-     *                          'column' => 'lang_id',
+     *                          'column' => 'lang_uuid',
      *                          'operator' => '=',
      *                          'value' => 'es'
      *                      ],
@@ -137,69 +192,9 @@ class SQLService
         return $queryBuilder;
     }
 
-    /**
-     * DEPRECATED by countGroupPaginateTotalRecords
-     * @param $queryBuilder
-     * @param null $queries sql to filter total count
-     * @return mixed
-     * @throws ParameterNotFoundException
-     * @throws ParameterValueException
-     */
-    public static function count($queryBuilder, $queries = null)
-    {
-        if($queries && is_array($queries)) $queryBuilder = SQLService::setQueryFilter($queryBuilder, $queries);
+    
 
-        return $queryBuilder->count();
-    }
-
-    /*/
-     * @param $queryBuilder
-     * @param $queries
-     * @return mixed
-     * @throws ParameterNotFoundException
-     * @throws ParameterValueException
-     */
-    public static function makeQueryBuilder($queryBuilder, $queries)
-    {
-        // commands without pagination and limit
-        foreach ($queries as $query)
-        {
-            if(! isset($query['command']))
-                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
-
-            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['column']))
-                throw new ParameterNotFoundException('Parameter column not found in request, please set column parameter in ' . json_encode($query));
-
-            if(($query['command'] === "WHERE" || $query['command'] === "ORDER_BY") && ! isset($query['operator']))
-                throw new ParameterNotFoundException('Parameter operator not found in request, please set operator parameter in ' . json_encode($query));
-
-            switch ($query['command'])
-            {
-                case 'OFFSET':
-                case 'LIMIT':
-                case 'ORDER_BY':
-                    // commands not accepted
-                    break;
-                case 'WHERE':
-                    $queryBuilder->where($query['column'], self::OPERATORS[$query['operator']], $query['value']);
-                    break;
-                case 'OR_WHERE':
-                    $queryBuilder->orWhere($query['column'], $query['operator'], $query['value']);
-                    break;
-                case 'WHERE_IN':
-                    $queryBuilder->whereIn($query['column'], $query['value']);
-                    break;
-                case 'WHERE_JSON_CONTAINS':
-                    $queryBuilder->whereJsonContains($query['column'], $query['value']);
-                    break;
-
-                default:
-                    throw new ParameterValueException('command parameter has a incorrect value, must to be where');
-            }
-        }
-
-        return $queryBuilder;
-    }
+    
 
     /**
      * @param   $queryBuilder
@@ -227,7 +222,7 @@ class SQLService
                 case 'WHERE_IN';
                 case 'WHERE_JSON_CONTAINS';
                     // commands not accepted, already
-                    // implemented in Quasar\Core\Services\SQLService::setQueryFilter method
+                    // implemented in Quasar\Core\Services\SQLService::makeQueryBuilder method
                     break;
                 case 'ORDER_BY':
                     $queryBuilder->orderBy($query['column'], $query['operator']);
@@ -256,9 +251,9 @@ class SQLService
      */
     public static function deleteRecord(
         string $uuid,
-        string $modelClassName,
-        string $langUuid = null,
-        string $langModelClassName = null
+        string $modelClassName
+        // string $langUuid = null,
+        // string $langModelClassName = null
     )
     {
         // get data to do model queries
@@ -269,80 +264,101 @@ class SQLService
                     ->where($table . '.uuid', $uuid)
                     ->first();
 
-        // Check if object has a langUuid, to know if has multiple languages
-        if (isset($langUuid))
+        // Check if object has a commonUuid, to know if has multiple languages
+        if ($object->commonUuid)
         {
+            // check if object to delete is base lang language
+            if (base_lang_uuid() === $object->langUuid)
+            {
+                // Delete records from same common uuid by delete main language
+                $model::where($table . '.common_uuid', $object->commonUuid)->delete();
+            }
+            else
+            {
+                // delete record from table without dependency from other table lang
+                $object->delete();
+                $object->deleteDataLang();
+            }
+
+
+
             /**
              * Check if controller has defined $langModelClassName property,
              * if has $langModelClassName, this means that the translations are in another table.
              * Get table name to do the query
              */
-            if ($langModelClassName)
+            
+            // TODO repasar si es langModelClassName
+            if(false) 
             {
-                // get data to do model queries
-                $langModel    = new $langModelClassName;
-                $langTable    = $langModel->getTable();
-
-                // get object from main table and lang table
-                // in builder method do the join between table and table lang
-                $object = $model->builder()
-                    ->where($langTable . '.lang_uuid', $langUuid)
-                    ->where($table . '.uuid', $uuid)
-                    ->first();
-
-                // check if must delete base_lang object
-                if(base_lang_uuid() === $langUuid)
+                if ($langModelClassName)
                 {
-                    // Delete record from main table and delete records in table lang by relations
-                    $model::where($table . '.uuid', $uuid)
-                        ->delete();
-
-                    return $object;
-                }
-
-                /**
-                 * This option is for tables that dependent of other tables to set your languages
-                 * set parameter $deleteLangDataRecord to false, because lang model haven't data_lag column
-                 */
-                $commonModel->deleteTranslationRecord($uuid, $commonUuid, false);
-
-                /**
-                 * This kind of tables has field data_lang in main table, not in lang table
-                 * delete data_lang parameter
-                 */
-                $model->deleteDataLang($commonUuid, $uuid, 'id');
-
-                /**
-                 * Count records, to know if has more lang
-                 */
-                $nRecords = $commonModel->builder()
-                    ->where($commonTable . '.uuid', $uuid)
-                    ->count();
-
-                /**
-                 * if haven't any lang record, delete record from main table
-                 */
-                if($nRecords === 0)
-                {
-                    $model->where($table . '.' . $primaryKey, $uuid)
-                        ->delete();
-                }
-            }
-            else
-            {
-                // check if must delete base_lang object
-                if (base_lang_uuid() === $langUuid)
-                {
-                    // Delete records from same common uuid by delete main language
-                    $model::where($table . '.common_uuid', $object->commonUuid)->delete();
+                    // get data to do model queries
+                    $langModel    = new $langModelClassName;
+                    $langTable    = $langModel->getTable();
+    
+                    // get object from main table and lang table
+                    // in builder method do the join between table and table lang
+                    $object = $model->builder()
+                        ->where($langTable . '.lang_uuid', $langUuid)
+                        ->where($table . '.uuid', $uuid)
+                        ->first();
+    
+                    // check if must delete base_lang object
+                    if(base_lang_uuid() === $langUuid)
+                    {
+                        // Delete record from main table and delete records in table lang by relations
+                        $model::where($table . '.uuid', $uuid)
+                            ->delete();
+    
+                        return $object;
+                    }
+    
+                    /**
+                     * This option is for tables that dependent of other tables to set your languages
+                     * set parameter $deleteLangDataRecord to false, because lang model haven't data_lag column
+                     */
+                    $commonModel->deleteTranslationRecord($uuid, $commonUuid, false);
+    
+                    /**
+                     * This kind of tables has field data_lang in main table, not in lang table
+                     * delete data_lang parameter
+                     */
+                    $model->deleteDataLang($commonUuid, $uuid, 'id');
+    
+                    /**
+                     * Count records, to know if has more lang
+                     */
+                    $nRecords = $commonModel->builder()
+                        ->where($commonTable . '.uuid', $uuid)
+                        ->count();
+    
+                    /**
+                     * if haven't any lang record, delete record from main table
+                     */
+                    if($nRecords === 0)
+                    {
+                        $model->where($table . '.' . $primaryKey, $uuid)
+                            ->delete();
+                    }
                 }
                 else
                 {
-                    // delete record from table without dependency from other table lang
-                    $object->delete();
-                    $object->deleteDataLang();
+                    // check if must delete base_lang object
+                    if (base_lang_uuid() === $langUuid)
+                    {
+                        // Delete records from same common uuid by delete main language
+                        $model::where($table . '.common_uuid', $object->commonUuid)->delete();
+                    }
+                    else
+                    {
+                        // delete record from table without dependency from other table lang
+                        $object->delete();
+                        $object->deleteDataLang();
+                    }
                 }
             }
+            
         }
         else
         {
@@ -417,16 +433,16 @@ class SQLService
         if($constraints && is_array($constraints))
         {
             // filter query
-            $queryBuilder = SQLService::setQueryFilter($queryBuilder, $constraints);
+            $queryBuilder = SQLService::makeQueryBuilder($queryBuilder, $constraints);
 
             // apply query parameters over filter
             $queryBuilder->where(function ($queryBuilder) use ($query) {
-                SQLService::setQueryFilter($queryBuilder, $query);
+                SQLService::makeQueryBuilder($queryBuilder, $query);
             });
         }
         else
         {
-            $queryBuilder = SQLService::setQueryFilter($queryBuilder, $query);
+            $queryBuilder = SQLService::makeQueryBuilder($queryBuilder, $query);
         }
 
         return $queryBuilder;

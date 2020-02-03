@@ -46,8 +46,6 @@ abstract class CoreResolver
 
     public function delete($root, array $args)
     {
-        $object = SQLService::deleteRecord($args['uuid'], get_class($this->model), $args['common_uuid'] ?? null, $args['lang_class'] ?? null);
-
-        return $object;
+        return $this->service->delete($args['uuid'], get_class($this->model), $args['commonUuid'] ?? null, $args['langClass'] ?? null);
     }
 }

@@ -1,6 +1,6 @@
 type Pagination 
 {
-    total: Int! @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@total")
+    total(constraints:[QueryStatementInput]): Int! @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@total")
     filtered: Int @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@filtered")
     objects(query:[QueryStatementInput] filters:[QueryStatementInput]): [JSON] @field(resolver: "Quasar\\Core\\GraphQL\\Resolvers\\PaginationResolver@objects")
 }

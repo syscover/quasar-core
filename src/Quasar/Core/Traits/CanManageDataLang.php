@@ -52,14 +52,13 @@ trait CanManageDataLang
     public function deleteDataLang()
     {
         // create static model instance
-        $instance = new static;
-        
-        $dataLang = $this->dataLang;
+        $model      = new static;
+        $dataLang   = $this->dataLang;
 
-        $index = array_search($this->langUuid, $this->dataLang);
+        $index = array_search($this->langUuid, $dataLang);
         array_splice($dataLang, $index, 1);
             
-        $instance::where('common_uuid', $this->commonUuid)
+        $model::where('common_uuid', $this->commonUuid)
             ->update([
                 'data_lang' => json_encode($dataLang)
             ]);
