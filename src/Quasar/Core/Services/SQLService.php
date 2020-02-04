@@ -20,6 +20,8 @@ class SQLService
      */
     public static function makeQueryBuilder($queryBuilder, $queries = [])
     {
+        if (! is_array($queries)) return $queryBuilder;
+
         // queries less OFFSET, LIMIT and ORDER_BY
         foreach ($queries as $query)
         {
@@ -252,8 +254,6 @@ class SQLService
     public static function deleteRecord(
         string $uuid,
         string $modelClassName
-        // string $langUuid = null,
-        // string $langModelClassName = null
     )
     {
         // get data to do model queries
@@ -263,24 +263,26 @@ class SQLService
         $object     = $model->builder()
                     ->where($table . '.uuid', $uuid)
                     ->first();
+        $objects    = null; // variable that contain various objects to delete, is used when delete object with base lang
 
         // Check if object has a commonUuid, to know if has multiple languages
         if ($object->commonUuid)
         {
-            // check if object to delete is base lang language
+            // delete records with same commonUuid
             if (base_lang_uuid() === $object->langUuid)
             {
+                $objects = $model::where($table . '.common_uuid', $object->commonUuid)->get();
+
                 // Delete records from same common uuid by delete main language
                 $model::where($table . '.common_uuid', $object->commonUuid)->delete();
             }
+            // delete simple record
             else
             {
                 // delete record from table without dependency from other table lang
                 $object->delete();
                 $object->deleteDataLang();
             }
-
-
 
             /**
              * Check if controller has defined $langModelClassName property,
@@ -358,7 +360,6 @@ class SQLService
                     }
                 }
             }
-            
         }
         else
         {
@@ -370,7 +371,8 @@ class SQLService
             $object->delete();
         }
 
-        return $object;
+        // return objects collection deleted
+        return $objects ? $objects : collect([$object]);
     }
 
 

@@ -7,9 +7,9 @@ abstract class CoreService
 {
     use ValidatesGraphQL;
 
-    public function delete($uuid, $model, $commonUuid = null, $langClass)
+    public function delete($uuid, $modelClassName)
     {
-        $object = SQLService::deleteRecord($uuid, $model, $commonUuid, $langClass);
+        $object = SQLService::deleteRecord($uuid, $modelClassName);
 
         return $object;
     }
