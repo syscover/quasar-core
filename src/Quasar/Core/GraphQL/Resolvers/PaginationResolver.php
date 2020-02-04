@@ -10,7 +10,7 @@ class PaginationResolver
         // save eager loads to load after execute FOUND_ROWS() MySql Function
         // FOUND_ROWS function get total number rows of last query, if model has eagerLoads, after execute the query model,
         // will execute eagerLoads losing the reference os last query to execute FOUND_ROWS() MySql Function
-        $eagerLoads     = $root->queryBuilder->getEagerLoads();
+        $root->eagerLoads     = $root->queryBuilder->getEagerLoads();
         $queryBuilder   = $root->queryBuilder->setEagerLoads([]);
 
         // count total objects with constraints
@@ -25,16 +25,10 @@ class PaginationResolver
 
     public function objects($root, array $args)
     {
-        //ATTENTION, this queryBuilder keep constraints applied in total method
+        //ATTENTION, this $root->queryBuilder keep constraints applied in total method
         
-        // save eager loads to load after execute FOUND_ROWS() MySql Function
-        // FOUND_ROWS function get total number rows of last query, if model has eagerLoads, after execute the query model,
-        // will execute eagerLoads losing the reference os last query to execute FOUND_ROWS() MySql Function
-        $eagerLoads     = $root->queryBuilder->getEagerLoads();
-        $queryBuilder   = $root->queryBuilder->setEagerLoads([]);
-
         // get query builder filtered by sql statement and filtered by filters statement
-        $queryBuilder = SQLService::makeQueryBuilder($queryBuilder, $args['query'] ?? null);
+        $queryBuilder = SQLService::makeQueryBuilder($root->queryBuilder, $args['query'] ?? null);
 
         // get query ordered and limited
         $queryBuilder = SQLService::makeQueryBuilderOrderedAndLimited($queryBuilder, $args['query'] ?? null);
@@ -46,8 +40,8 @@ class PaginationResolver
         // this function is executed after resolveObjectsField according to the position of fields marked in the GraphQL query
         $root->filtered = DB::select(DB::raw("select FOUND_ROWS() as 'filtered'"))[0]->filtered;
 
-        // load eager loads
-        $objects->load($eagerLoads);
+        // load eager loads saved previously in total method
+        $objects->load($root->eagerLoads);
 
         return $objects;
     }
