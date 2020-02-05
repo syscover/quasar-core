@@ -52,6 +52,6 @@ php_value memory_limit 256M
 **3 - Testing**
 To run laravel testing
 ```
-./vendor/bin/phpunit
+./vendor/bin/phpunit vendor/quasar/core
 ```
 
