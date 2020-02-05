@@ -2,7 +2,7 @@
 
 use Exception;
 
-class AuthenticateException extends Exception
+class AuthenticationException extends Exception
 {
     protected $message = 'Error to authenticate user';
 }
