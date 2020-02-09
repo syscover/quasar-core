@@ -1,9 +1,9 @@
 <?php namespace Quasar\Core\Services;
 
-use Illuminate\Support\Facades\Schema;
 use Quasar\Core\Exceptions\ParameterNotFoundException;
 use Quasar\Core\Exceptions\ParameterValueException;
 use Quasar\Core\Support\Operator;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class SQLService
@@ -53,7 +53,16 @@ class SQLService
                 case 'WHERE_JSON_CONTAINS':
                     $queryBuilder->whereJsonContains($query['column'], $query['value']);
                     break;
-
+                case 'WHERE_HAS':
+                    $queryBuilder->whereHas($query['column'], function(Builder $queryBuilder) use ($query) {
+                        self::makeQueryBuilder($queryBuilder, $query['query']);
+                    });
+                    break;
+                case 'OR_WHERE_HAS':
+                    $queryBuilder->orWhereHas($query['column'], function(Builder $queryBuilder) use ($query) {
+                        self::makeQueryBuilder($queryBuilder, $query['query']);
+                    });
+                    break;
                 default:
                     throw new ParameterValueException('command parameter has a incorrect value, must to be where');
             }
@@ -219,8 +228,10 @@ class SQLService
                 throw new ParameterNotFoundException('Parameter value not found in request, please set value parameter in: ' . json_encode($query));
 
             switch ($query['command']) {
-                case 'WHERE':
                 case 'OR_WHERE';
+                case 'OR_WHERE_HAS';
+                case 'WHERE':
+                case 'WHERE_HAS';
                 case 'WHERE_IN';
                 case 'WHERE_JSON_CONTAINS';
                     // commands not accepted, already

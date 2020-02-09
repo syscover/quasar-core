@@ -8,6 +8,8 @@ input QueryStatementInput
     operator: Operator
     """ Value for statement """
     value: Any
+    """ Value for define queries in clousures """
+    query: [QueryStatementInput]
 }
 
 """ Input to request config value """
