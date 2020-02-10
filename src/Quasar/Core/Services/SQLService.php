@@ -71,6 +71,54 @@ class SQLService
         return $queryBuilder;
     }
 
+    /**
+     * @param   $queryBuilder
+     * @param   array $queries
+     * @return  mixed
+     * @throws  ParameterNotFoundException
+     * @throws  ParameterValueException
+     */
+    public static function makeQueryBuilderOrderedAndLimited($queryBuilder, $queries = null)
+    {
+        if(! $queries) return $queryBuilder;
+
+        // sentences for order query and limited
+        foreach ($queries as $query)
+        {
+            if(! isset($query['command']))
+                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
+
+            if(($query['command'] === "OFFSET" || $query['command'] === "LIMIT") && ! isset($query['value']))
+                throw new ParameterNotFoundException('Parameter value not found in request, please set value parameter in: ' . json_encode($query));
+
+            switch ($query['command']) {
+                case 'OR_WHERE';
+                case 'OR_WHERE_HAS';
+                case 'WHERE':
+                case 'WHERE_HAS';
+                case 'WHERE_IN';
+                case 'WHERE_JSON_CONTAINS';
+                    // commands not accepted, already
+                    // implemented in Quasar\Core\Services\SQLService::makeQueryBuilder method
+                    break;
+                case 'ORDER_BY':
+                    $queryBuilder->orderBy($query['column'], $query['operator']);
+                    break;
+                case 'OFFSET':
+                    $queryBuilder->offset($query['value']);
+                    break;
+                case 'LIMIT':
+                    $queryBuilder->limit($query['value']);
+                    break;
+
+                default:
+                    throw new ParameterValueException('command parameter has a incorrect value, must to be offset or take');
+            }
+        }
+
+        return $queryBuilder;
+    }
+
     
 
 
@@ -207,68 +255,19 @@ class SQLService
 
     
 
-    /**
-     * @param   $queryBuilder
-     * @param   array $queries
-     * @return  mixed
-     * @throws  ParameterNotFoundException
-     * @throws  ParameterValueException
-     */
-    public static function makeQueryBuilderOrderedAndLimited($queryBuilder, $queries = null)
-    {
-        if(! $queries) return $queryBuilder;
-
-        // sentences for order query and limited
-        foreach ($queries as $query)
-        {
-            if(! isset($query['command']))
-                throw new ParameterNotFoundException('Parameter command not found in request, please set command parameter in ' . json_encode($query));
-
-            if(($query['command'] === "OFFSET" || $query['command'] === "LIMIT") && ! isset($query['value']))
-                throw new ParameterNotFoundException('Parameter value not found in request, please set value parameter in: ' . json_encode($query));
-
-            switch ($query['command']) {
-                case 'OR_WHERE';
-                case 'OR_WHERE_HAS';
-                case 'WHERE':
-                case 'WHERE_HAS';
-                case 'WHERE_IN';
-                case 'WHERE_JSON_CONTAINS';
-                    // commands not accepted, already
-                    // implemented in Quasar\Core\Services\SQLService::makeQueryBuilder method
-                    break;
-                case 'ORDER_BY':
-                    $queryBuilder->orderBy($query['column'], $query['operator']);
-                    break;
-                case 'OFFSET':
-                    $queryBuilder->offset($query['value']);
-                    break;
-                case 'LIMIT':
-                    $queryBuilder->limit($query['value']);
-                    break;
-
-                default:
-                    throw new ParameterValueException('command parameter has a incorrect value, must to be offset or take');
-            }
-        }
-
-        return $queryBuilder;
-    }
+    
 
     /**
-     * @param int           $uuid
-     * @param string        $modelClassName
-     * @param string|null   $commonUuid
-     * @param string|null   $commonClassName
+     * @param string        $uuid
+     * @param object        $model
      * @return mixed
      */
     public static function deleteRecord(
         string $uuid,
-        string $modelClassName
+        object $model
     )
     {
         // get data to do model queries
-        $model      = new $modelClassName;
         $table      = $model->getTable();
         $primaryKey = $model->getKeyName();
         $object     = $model->builder()

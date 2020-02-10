@@ -15,13 +15,15 @@ trait CanManageDataLang
 
         $n = $model::where('common_uuid', $this->commonUuid)->count();
 
+        // add dataLang over base lang object
         if ($n === 1)
         {
             $dataLang[] = $this->langUuid;
         }
+        // add dataLang over foreign lang object
         else
         {
-            // get record with the same common uuid
+            // get record with the same common uuid, we discard self object that not contain data lang updated
             $object = $model::where('common_uuid', $this->commonUuid)
                 ->where('uuid', '<>', $this->uuid)
                 ->first();

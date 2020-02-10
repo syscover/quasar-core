@@ -46,6 +46,6 @@ abstract class CoreResolver
 
     public function delete($root, array $args)
     {
-        return $this->service->delete($args['uuid'], get_class($this->model));
+        return $this->service->delete($args, $this->model);
     }
 }
