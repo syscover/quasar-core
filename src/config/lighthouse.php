@@ -32,6 +32,7 @@ return [
          */
         'middleware' => [
             \Nuwave\Lighthouse\Support\Http\Middleware\AcceptJson::class,
+            \Quasar\OAuth\GraphQL\Middlewares\Authorization::class
         ],
 
         /*

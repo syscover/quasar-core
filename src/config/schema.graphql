@@ -4,6 +4,11 @@
 #import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/inputs.graphql
 #import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/types.graphql
 
+# OAuth
+#import ./../vendor/quasar/oauth/src/Quasar/OAuth/GraphQL/enums.graphql
+#import ./../vendor/quasar/oauth/src/Quasar/OAuth/GraphQL/inputs.graphql
+#import ./../vendor/quasar/oauth/src/Quasar/OAuth/GraphQL/types.graphql
+
 # Admin
 #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/inputs.graphql
 #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/types.graphql
@@ -16,6 +21,9 @@ type Query
     # Core
     #import ./../vendor/quasar/core/src/Quasar/Core/GraphQL/queries.graphql
 
+    # OAuth
+    #import ./../vendor/quasar/oauth/src/Quasar/OAuth/GraphQL/queries.graphql
+
     # Admin
     #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/queries.graphql
 
@@ -25,6 +33,9 @@ type Query
 
 type Mutation 
 {
+    # OAuth
+    #import ./../vendor/quasar/oauth/src/Quasar/OAuth/GraphQL/mutations.graphql
+    
     # Admin
     #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/mutations.graphql
 

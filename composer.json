@@ -18,10 +18,10 @@
     ],
     "require": {
         "php": "^7.3",
-        "firebase/php-jwt": "^5.0",
         "intervention/image": "^2.5",
         "nuwave/lighthouse": "^4.6",
         "mll-lab/laravel-graphql-playground": "^2.0",
+        "quasar/oauth": "^1.0",
         "staudenmeir/eloquent-has-many-deep": "^1.11"
     },
     "autoload": {

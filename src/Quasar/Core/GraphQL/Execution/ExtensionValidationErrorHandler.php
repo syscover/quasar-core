@@ -17,7 +17,8 @@ class ExtensionValidationErrorHandler implements ErrorHandler
         // in this case, we try catch ValidationException
         $underlyingException = $error->getPrevious();
 
-        if ($underlyingException && $underlyingException instanceof ValidationException) {
+        if ($underlyingException && $underlyingException instanceof ValidationException) 
+        {
             // Reconstruct the error, passing in the extensions of the underlying exception
             $error = new Error(
                 $error->message,
