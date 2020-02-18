@@ -23,6 +23,13 @@ php artisan vendor:publish --provider="Quasar\Core\CoreServiceProvider"
 php artisan storage:link
 ```
 
+**4 - Execute migrations and seed database**
+```
+composer dump-autoload
+php artisan migrate
+php artisan db:seed --class="OAuthSeeder"
+```
+
 ## Tips
 **1 - Don't forget config environment variables database**
 ```
