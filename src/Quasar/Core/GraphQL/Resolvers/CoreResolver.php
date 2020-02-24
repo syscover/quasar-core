@@ -11,7 +11,7 @@ abstract class CoreResolver
     {
         $query = $this->model->builder();
 
-        if(isset($args['query']))
+        if (isset($args['query']))
         {
             $query = SQLService::makeQueryBuilder($query, $args['query']);
             $query = SQLService::makeQueryBuilderOrderedAndLimited($query, $args['query']);
@@ -29,9 +29,14 @@ abstract class CoreResolver
 
     public function find($root, array $args)
     {
-        $query = SQLService::makeQueryBuilder($this->model->builder(), $args['query']);
+        if (isset($args['query']))
+        {
+            $query = SQLService::makeQueryBuilder($this->model->builder(), $args['query']);
 
-        return $query->first();
+            return $query->first();
+        }
+
+        return null;
     }
 
     public function create($root, array $args)
