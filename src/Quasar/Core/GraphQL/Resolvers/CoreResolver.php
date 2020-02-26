@@ -1,7 +1,5 @@
 <?php namespace Quasar\Core\GraphQL\Resolvers;
 
-use Quasar\Core\Services\SQLService;
-
 abstract class CoreResolver
 {
     protected $model;
@@ -9,15 +7,7 @@ abstract class CoreResolver
 
     public function get($root, array $args)
     {
-        $query = $this->model->builder();
-
-        if (isset($args['query']))
-        {
-            $query = SQLService::makeQueryBuilder($query, $args['query']);
-            $query = SQLService::makeQueryBuilderOrderedAndLimited($query, $args['query']);
-        }
-
-        return $query->get();
+        return $this->service->get($args, $this->model);
     }
 
     public function paginate($root, array $args)
@@ -29,14 +19,7 @@ abstract class CoreResolver
 
     public function find($root, array $args)
     {
-        if (isset($args['query']))
-        {
-            $query = SQLService::makeQueryBuilder($this->model->builder(), $args['query']);
-
-            return $query->first();
-        }
-
-        return null;
+        return $this->service->find($args, $this->model);
     }
 
     public function create($root, array $args)

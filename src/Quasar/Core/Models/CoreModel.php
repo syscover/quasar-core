@@ -8,7 +8,7 @@ use Quasar\Core\Traits\Uuid;
 
 /**
  * Class Model
- * @package Quasar\Pulsar\Core
+ * @package Quasar\Core\Models
  */
 
 class CoreModel extends BaseModel
