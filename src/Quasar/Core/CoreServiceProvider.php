@@ -2,6 +2,8 @@
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Contracts\Config\Repository as ConfigRepository;
+use Illuminate\Contracts\Debug\ExceptionHandler;
+use Quasar\Core\Exceptions\Handler;
 
 class CoreServiceProvider extends ServiceProvider
 {
@@ -28,6 +30,12 @@ class CoreServiceProvider extends ServiceProvider
         $this->publishes([
             __DIR__ . '/../../config/schema.graphql' => $configRepository->get('lighthouse.schema.register')
         ], 'schema');
+
+        // set custom handler exception 
+        $this->app->bind(
+            ExceptionHandler::class,
+            Handler::class
+        );   
 	}
 
 	/**

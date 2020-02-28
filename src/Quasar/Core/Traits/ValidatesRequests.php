@@ -4,12 +4,12 @@ use Illuminate\Contracts\Validation\Factory;
 use Illuminate\Validation\ValidationException;
 
 /**
- * Trait ValidatesGraphQL
+ * Trait Validates
  *
  * Trait generated from Illuminate\Foundation\Validation\ValidatesRequests to replace request by data array
  * @package Quasar\Core\Traits
  */
-trait ValidatesGraphQL
+trait ValidatesRequests
 {
     /**
      * Run the validation routine against the given validator.
@@ -62,9 +62,12 @@ trait ValidatesGraphQL
      */
     public function validateWithBag($errorBag, array $data, array $rules, array $messages = [], array $customAttributes = [])
     {
-        try {
+        try 
+        {
             return $this->validate($data, $rules, $messages, $customAttributes);
-        } catch (ValidationException $e) {
+        } 
+        catch (ValidationException $e) 
+        {
             $e->errorBag = $errorBag;
 
             throw $e;

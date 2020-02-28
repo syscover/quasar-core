@@ -1,11 +1,11 @@
 <?php namespace Quasar\Core\Services;
 
-use Quasar\Core\Traits\ValidatesGraphQL;
+use Quasar\Core\Traits\ValidatesRequests;
 use Quasar\Core\Services\SQLService;
 
 abstract class CoreService
 {
-    use ValidatesGraphQL;
+    use ValidatesRequests;
 
     public function get(array $data, $model)
     {

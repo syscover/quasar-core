@@ -2,14 +2,14 @@
 
 use Illuminate\Http\Response;
 
-trait ApiRestResponse
+trait JsonResponse
 {
     /**
      * @param   $data
      * @param   int $code
      * @return  \Illuminate\Http\JsonResponse
      */
-    public function successResponse($data, $code = Response::HTTP_OK)
+    public static function successResponse($data, $code = Response::HTTP_OK)
     {
         return response()->json([
             'status'        => $code,
@@ -23,11 +23,15 @@ trait ApiRestResponse
      * @param   $code
      * @return  \Illuminate\Http\JsonResponse
      */
-    public function errorResponse($message, $code)
+    public static function errorResponse($message, $code, $errors = null)
     {
-        return response()->json([
+        $response = [
             'status'        => $code,
-            'statusText'    => $message,
-        ], $code);
+            'statusText'    => $message  
+        ];
+
+        if ($errors) $response['errors'] = $errors;
+
+        return response()->json($response, $code);
     }
 }

@@ -6,7 +6,7 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 use Quasar\Core\Exceptions\ModelNotChangeException;
-use Quasar\Core\Traits\ApiRestResponse;
+use Quasar\Core\Traits\JsonResponse;
 
 /**
  * Class CoreController
@@ -15,14 +15,13 @@ use Quasar\Core\Traits\ApiRestResponse;
 
 abstract class CoreController extends BaseController
 {
-    use ApiRestResponse;
+    use JsonResponse;
 
     protected $model;
     protected $service;
 
     public function get(Request $request)
     {
-        //dd($request->all());
         $response = $this->service->get($request->all(), $this->model);
 
         return $this->successResponse($response);
