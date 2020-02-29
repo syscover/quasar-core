@@ -41,14 +41,14 @@ abstract class CoreController extends BaseController
         return $this->successResponse($response, Response::HTTP_CREATED);
     }
 
-    public function update($root, array $args)
+    public function update(Request $request)
     {
         $response = $this->service->update($request->all(), $request->input('uuid'));
 
         return $this->successResponse($response);
     }
 
-    public function delete($root, array $args)
+    public function delete(Request $request)
     {
         $response = $this->service->delete($request->all(), $this->model);
 
