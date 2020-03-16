@@ -16,7 +16,7 @@ trait Uuid
     {
         /**
          * Attach to the 'creating' Model Event to provide a UUID
-         * for the `id` field (provided by $model->getKeyName())
+         * for the `uuid` field (provided by $model->getKeyName())
          */
         static::creating(function ($model) 
         {
