@@ -27,6 +27,9 @@ type Query
     # Admin
     #import ./../vendor/quasar/admin/src/Quasar/Admin/GraphQL/queries.graphql
 
+    # Search Engine
+    #import ./../vendor/quasar/search-engine/src/Quasar/SearchEngine/GraphQL/queries.graphql
+
     # Add here other queries
 
 }

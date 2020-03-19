@@ -279,7 +279,7 @@ class SQLService
         if ($object->commonUuid)
         {
             // delete records with same commonUuid
-            if (base_lang_uuid() === $object->langUuid)
+            if (baseLangUuid() === $object->langUuid)
             {
                 $objects = $model::where($table . '.common_uuid', $object->commonUuid)->get();
 
@@ -316,8 +316,8 @@ class SQLService
                         ->where($table . '.uuid', $uuid)
                         ->first();
     
-                    // check if must delete base_lang object
-                    if(base_lang_uuid() === $langUuid)
+                    // check if must delete base lang object
+                    if (baseLangUuid() === $langUuid)
                     {
                         // Delete record from main table and delete records in table lang by relations
                         $model::where($table . '.uuid', $uuid)
@@ -356,8 +356,8 @@ class SQLService
                 }
                 else
                 {
-                    // check if must delete base_lang object
-                    if (base_lang_uuid() === $langUuid)
+                    // check if must delete base lang object
+                    if (baseLangUuid() === $langUuid)
                     {
                         // Delete records from same common uuid by delete main language
                         $model::where($table . '.common_uuid', $object->commonUuid)->delete();
