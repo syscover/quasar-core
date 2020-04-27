@@ -8,12 +8,17 @@ Quasar is a application that generates a control panel where you can create cust
 ---
 ## Installation
 
-**1 - After install Laravel framework, execute on console:**
+**1 -To avoid conflicts we will eliminate the default migrations of laravel, from root directory**
+```
+rm -rf database/migrations/*
+```
+
+**2 - After install Laravel framework, execute on console:**
 ```
 composer require quasar/core
 ```
 
-**2 - Execute publish command**
+**3 - Execute publish command**
 ```
 php artisan vendor:publish --provider="Quasar\Core\CoreServiceProvider"
 ```
